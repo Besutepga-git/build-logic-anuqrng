@@ -1,0 +1,12 @@
+{
+  "name": "quantum-qrng-api",
+  "version": "1.0.0",
+  "description": "An API that proxies true quantum random numbers from ANU QRNG",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
