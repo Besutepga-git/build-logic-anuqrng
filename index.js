@@ -6,7 +6,6 @@ const ANU_API_KEY = "m3gDJPQXaN557YWcEFtTV7dAO6JJq1Ef5Js70IpU";
 
 app.get('/quantum-random', async (req, res) => {
     try {
-        // Notice: No sub-paths. Parameters are attached directly to the root domain.
         const response = await fetch('https://anu.edu.au', {
             method: 'GET',
             headers: {
@@ -15,15 +14,20 @@ app.get('/quantum-random', async (req, res) => {
             }
         });
 
-        // This checks if the server gave an HTML error page instead of a number
-        if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(`ANU Server Error: ${response.status} - ${errText}`);
+        // MODIFICATION: Check if the response type is actually JSON before parsing
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            const gatewayErrorText = await response.text();
+            return res.status(502).json({
+                success: false,
+                error: "ANU Cloud Gateway Error",
+                message: "The server sent back an HTML error page instead of numbers.",
+                details: gatewayErrorText.slice(0, 300) // This prints out the exact text causing the '<' crash
+            });
         }
 
         const data = await response.json();
         
-        // Match the official ANU data schema response
         if (data && data.success && data.data) {
             return res.json({ 
                 success: true,
@@ -49,4 +53,3 @@ app.get('/', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
