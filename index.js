@@ -21,11 +21,11 @@ app.get('/quantum-random', async (req, res) => {
 
         const data = await response.json();
         
-        if (data && data.data) {
+        if (data && data.success && data.data) {
             return res.json({ 
                 success: true,
                 source: "ANU Quantum Cloud Cluster",
-                number: data.data 
+                number: data.data[0]
             });
         } else {
             throw new Error("Invalid structure received from ANU Quantum API");
