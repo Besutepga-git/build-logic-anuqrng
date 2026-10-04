@@ -25,7 +25,7 @@ app.get('/quantum-random', async (req, res) => {
             return res.json({ 
                 success: true,
                 source: "ANU Quantum Cloud Cluster",
-                number: data.data[0]
+                number: data.data
             });
         } else {
             throw new Error("Invalid structure received from ANU Quantum API");
@@ -46,5 +46,4 @@ app.get('/', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
 
