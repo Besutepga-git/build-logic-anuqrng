@@ -14,9 +14,10 @@ app.get('/quantum-random', async (req, res) => {
             }
         });
 
-        if (!response.ok) {
-            const errText = await response.text();
-            throw new Error(`ANU Server Error: ${response.status} - ${errText}`);
+        const contentType = response.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+            const rawText = await response.text();
+            throw new Error(`Server returned non-JSON response: ${rawText.slice(0, 100)}`);
         }
 
         const data = await response.json();
@@ -25,7 +26,7 @@ app.get('/quantum-random', async (req, res) => {
             return res.json({ 
                 success: true,
                 source: "ANU Quantum Cloud Cluster",
-                number: data.data
+                number: data.data[0]
             });
         } else {
             throw new Error("Invalid structure received from ANU Quantum API");
