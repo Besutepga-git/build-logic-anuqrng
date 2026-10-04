@@ -6,7 +6,7 @@ const ANU_API_KEY = "m3gDJPQXaN557YWcEFtTV7dAO6JJq1Ef5Js70IpU";
 
 app.get('/quantum-random', async (req, res) => {
     try {
-        // Notice the corrected cloud sub-path: /v1.0/random
+        // Notice: No sub-paths. Parameters are attached directly to the root domain.
         const response = await fetch('https://anu.edu.au', {
             method: 'GET',
             headers: {
@@ -15,13 +15,20 @@ app.get('/quantum-random', async (req, res) => {
             }
         });
 
+        // This checks if the server gave an HTML error page instead of a number
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(`ANU Server Error: ${response.status} - ${errText}`);
+        }
+
         const data = await response.json();
         
+        // Match the official ANU data schema response
         if (data && data.success && data.data) {
             return res.json({ 
                 success: true,
                 source: "ANU Quantum Cloud Cluster",
-                number: data.data[0] // Pulls the actual number out of the array list
+                number: data.data
             });
         } else {
             throw new Error("Invalid structure received from ANU Quantum API");
@@ -42,5 +49,4 @@ app.get('/', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
 
