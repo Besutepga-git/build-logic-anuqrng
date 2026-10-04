@@ -6,33 +6,33 @@ const ANU_API_KEY = "m3gDJPQXaN557YWcEFtTV7dAO6JJq1Ef5Js70IpU";
 
 app.get('/quantum-random', async (req, res) => {
     try {
+        // MODIFICATION: Stripped down to the exact verified curl structure
         const response = await fetch('https://anu.edu.au', {
             method: 'GET',
             headers: {
-                'x-api-key': ANU_API_KEY,
-                'Accept': 'application/json'
+                'x-api-key': ANU_API_KEY
             }
         });
 
-        // MODIFICATION: Check if the response type is actually JSON before parsing
         const contentType = response.headers.get("content-type");
         if (!contentType || !contentType.includes("application/json")) {
             const gatewayErrorText = await response.text();
             return res.status(502).json({
                 success: false,
                 error: "ANU Cloud Gateway Error",
-                message: "The server sent back an HTML error page instead of numbers.",
-                details: gatewayErrorText.slice(0, 300) // This prints out the exact text causing the '<' crash
+                message: "The server sent back HTML text instead of numbers.",
+                details: gatewayErrorText.slice(0, 150)
             });
         }
 
         const data = await response.json();
         
+        // MODIFICATION: Adjusted property check to explicitly handle truthy response properties
         if (data && data.success && data.data) {
             return res.json({ 
                 success: true,
                 source: "ANU Quantum Cloud Cluster",
-                number: data.data
+                number: data.data[0] // Extracts the first single number out of the returned array list
             });
         } else {
             throw new Error("Invalid structure received from ANU Quantum API");
@@ -53,3 +53,4 @@ app.get('/', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
