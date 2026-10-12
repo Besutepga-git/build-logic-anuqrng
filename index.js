@@ -27,11 +27,15 @@ app.get('/quantum-random', async (req, res) => {
             throw new Error("Invalid response format from ANU");
         }
     } catch (error) {
-        res.status(500).setHeader('Content-Type', 'text/plain');
-        const internalMessage = error.response && typeof error.response.data === 'string'
-            ? error.response.data.slice(0, 100)
-            : error.message;
-        return res.send(`Error: ${internalMessage}`);
+        res.setHeader('Content-Type', 'text/plain');
+        
+        // Check if the error is a 429 Rate Limit from ANU
+        if (error.response && error.response.status === 429) {
+            res.status(429);
+            return res.send("Slow down! You are refreshing too fast. Wait a moment and try again.");
+        }
+        
+        return res.status(500).send(`Error: ${error.message}`);
     }
 });
 
